@@ -247,7 +247,7 @@ CI_coverage_comparison <- function(B = 100, thetavalues = seq(from = 0, to = 1, 
 
 
 #To see plots of coverage in the window
-CI_coverage_comparison(B = 10^3, thetavalues = seq(from = 0, to = 1, by = 0.1), eps = 1, n = 30, seed = 345, H = 10^3, alpha = 0.05)
+CI_coverage_comparison(B = 10^3, thetavalues = seq(from = 0, to = 1, by = 0.1), eps = 1, n = 30, seed = 345, H = 10^4, alpha = 0.05)
 
 # # Save the plot as JINI_coverage.png (This is for running on HPC)
 # plot_file <- "JINI_coverage.png"
