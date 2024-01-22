@@ -179,7 +179,7 @@ JINI_Inter <- function(pi0, B, eps, n, seed){
 
 
 #################################################################
- # Power Simulation for the test; H0: theta <= 0.9 vs Ha: theta < 0.9
+ # Power Simulation for the test; H0: theta <= 0.9 vs Ha: theta > 0.9
 
 H = 10^3
 B = 10^3 
@@ -281,7 +281,7 @@ ggplot(power_data, aes(x = SampleSize, y = Power, color = Method)) +
 
 
 ##########################################################################################################################
-# Level Simulation for the test; H0: theta <= 0.9 vs Ha: theta < 0.9
+# Level Simulation for the test; H0: theta <= 0.9 vs Ha: theta > 0.9
 
 H = 10^3
 B = 10^3
