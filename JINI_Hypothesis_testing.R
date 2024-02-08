@@ -179,7 +179,7 @@ JINI_Inter <- function(pi0, B, eps, n, seed){
 
 
 #################################################################
- # Power Simulation for the test; H0: theta <= 0.9 vs Ha: theta > 0.9
+# Power Simulation for the test; H0: theta = 0.9 vs Ha: theta > 0.9
 
 H = 10^3
 B = 10^3 
@@ -281,7 +281,7 @@ ggplot(power_data, aes(x = SampleSize, y = Power, color = Method)) +
 
 
 ##########################################################################################################################
-# Level Simulation for the test; H0: theta <= 0.9 vs Ha: theta > 0.9
+# Level Simulation for the test; H0: theta = theta_0 vs Ha: theta < theta_0
 
 H = 10^3
 B = 10^3
@@ -302,7 +302,7 @@ for (j in 1:length(theta0)){
     
     # JINI P-Value
     emp_density = JINI_algorithm_Fudicial_Appl(pi0 = pi0, B = B, eps = eps, n = n, seed = i + 2*B)
-    res_jini[i,j] = sum(emp_density <= theta0[j])/(B+1)
+    res_jini[i,j] = sum(emp_density > theta0[j])/(B+1)
     
     # # Nonprivate JINI P-value
     # emp_density_JINI_NP = JINI_algorithm_Fudicial_Nonprivate(pi0 = pi0, B = B, n = n, seed = i + 2*B)
@@ -311,12 +311,12 @@ for (j in 1:length(theta0)){
     
     # JINI with normal approximation to binomial P-Value  
     emp_density_normal_approx = jini(pi0 = pi0, B = B, eps = eps, n = n, seed = i + 2*B)
-    res_jini_normal_approx[i,j] = sum(emp_density_normal_approx <= theta0[j])/(B + 1)
+    res_jini_normal_approx[i,j] = sum(emp_density_normal_approx < theta0[j])/(B + 1)
     
-  
+    
     # JINI with interpolation
     emp_density_inter = JINI_Inter(pi0 = pi0, B = B, eps = eps, n = n, seed = i + 2*B)
-    res_jini_inter[i,j] = sum(emp_density_inter <= theta0[j])/(B + 1)
+    res_jini_inter[i,j] = sum(emp_density_inter < theta0[j])/(B + 1)
     
     
     
@@ -345,11 +345,11 @@ for (j in 1:length(theta0)){
     Laplace = X + E1 - E2
     res_norm[i,j] = 1 - pnorm(Laplace, m = theta0[j]*n, s = sqrt(n*theta0[j]*(1 - theta0[j])+2/eps^2))
     
-    print(i/H)
+    #print(i/H)
     
   }
   
-  print(j/length(theta0))
+  #print(j/length(theta0))
   
 }
 
