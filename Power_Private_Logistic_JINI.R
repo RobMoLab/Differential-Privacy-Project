@@ -56,7 +56,7 @@ jini_logistic_fiducial_Priv = function(pi1, pi2, B, eps, n1, n2, seed){
 
 # H0: beta = 0      Vs    H1: beta < 0
 
-H = 1
+H = 10^3
 B = 10^3 
 n1 = 16*2^(0:5)
 n2 = 12*2^(0:5)
