@@ -1,4 +1,4 @@
-###############################################################################
+##############################################################################
 # Fiducial Approach for Differentially Private Proportion Estimation
 #
 # Description: Implements and evaluates a fiducial-based approach for computing
