@@ -1,5 +1,4 @@
 #' Compute Empirical Power and Timing for Binomial Hypothesis Testing
-#'
 #' This function simulates the empirical power of a hypothesis test for binomial proportions
 #' under the null (`theta0`) and alternative (`theta_values`) hypotheses. It also records
 #' computation time for each simulation.
