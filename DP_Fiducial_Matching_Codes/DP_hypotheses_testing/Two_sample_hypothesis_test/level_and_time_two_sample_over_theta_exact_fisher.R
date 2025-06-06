@@ -104,7 +104,7 @@ simulate_test_exact <- function(n, theta_range, num_simulations, alpha) {
 sample_size <- 30          # Fixed sample size for both groups
 theta_values <- seq(0.1, 0.9, by = 0.1)  # True proportion values to evaluate
 alpha <- 0.05             # Significance level
-num_simulations <- 10^2   # Number of simulations per theta value
+num_simulations <- 10^4   # Number of simulations per theta value
 
 # Run simulation with exact test
 sim_results_exact <- simulate_test_exact(
