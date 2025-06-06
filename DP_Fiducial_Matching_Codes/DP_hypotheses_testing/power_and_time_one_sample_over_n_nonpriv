@@ -1,0 +1,62 @@
+#' Power Simulation for Non-Private Binomial Test
+#' 
+#' Evaluates the power of a non-private hypothesis test for binomial proportions
+#' with uniform continuity correction.
+#' 
+#' @param B Number of Monte Carlo replications (default = 100)
+#' @param n_vec Vector of sample sizes to evaluate (required)
+#' @param theta0 True proportion under alternative hypothesis (default = 0.95)
+#' 
+#' @return A data frame containing:
+#'   - n: Sample sizes
+#'   - power_nonpriv: Estimated power at each sample size
+#'   - mean_time_nonpriv: Average computation time in milliseconds
+
+# Simulation parameters
+B <- 10^4  # Number of Monte Carlo replications
+n_vec <- c(16, 30, 50, 100, 150, 200, 350, 400, 500)  # Sample sizes to evaluate
+theta0 <- 0.95  # True proportion under alternative hypothesis
+
+# Initialize result matrices
+res_nonpriv <- matrix(NA, B, length(n_vec))  # Stores p-values
+time_nonpriv <- matrix(NA, B, length(n_vec)) # Stores computation times
+
+# Main simulation loop
+for (j in 1:length(n_vec)) {
+  for (i in 1:B) {
+    set.seed(i)  # Ensure reproducibility
+    
+    # Start timing
+    start_time <- Sys.time()
+    
+    # Generate data from alternative distribution
+    X <- rbinom(n = 1, size = n_vec[j], prob = theta0)
+    
+    # Calculate null distribution (θ = 0.9)
+    values <- seq(0, n_vec[j])
+    pdf <- dbinom(values, size = n_vec[j], prob = 0.9)
+    
+    # Compute test statistic with uniform continuity correction
+    Z <- X + runif(n = 1, min = -1/2, max = 1/2)
+    
+    # Calculate p-value using uniform CDF
+    cdf <- punif(values - Z, min = -1/2, max = 1/2)
+    res_nonpriv[i,j] <- t(cdf) %*% pdf  # Store p-value
+    
+    # End timing (convert to milliseconds)
+    end_time <- Sys.time()
+    time_nonpriv[i,j] <- as.numeric(difftime(end_time, start_time, units = "secs")) * 1000
+  }
+}
+
+# Calculate power and average computation time
+power <- apply(res_nonpriv < 0.05, 2, mean)  # alpha =0.05
+mean_time <- apply(time_nonpriv, 2, mean)
+
+# Create results data frame
+results <- data.frame(
+  n = n_vec,
+  power_nonpriv = power,
+  mean_time_nonpriv = mean_time
+)
+print(results)
