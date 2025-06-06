@@ -1,5 +1,4 @@
-#' Compute Power of Exact Binomial Test
-#' 
+#' Compute Power of Exact Binomial Test 
 #' Simulates the power of an exact binomial test for H₀: θ ≤ θ₀ vs Hₐ: θ > θ₀
 #' across different sample sizes.
 #' 
