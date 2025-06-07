@@ -32,7 +32,7 @@ get_pi <- function(theta, eps, n) {
 #' 1. Adds Laplace noise scaled by privacy budget ε
 #' 2. Generates beta-distributed fiducial samples
 #' 3. Handles boundary cases with machine epsilon
-ibf <- function(pi0, eps, n, H = 1, delta = 1, seed = 123) {
+fima <- function(pi0, eps, n, H = 1, delta = 1, seed = 123) {
   set.seed(seed)
   
   Wj <- runif(H, -0.5, 0.5)
@@ -54,7 +54,7 @@ ibf <- function(pi0, eps, n, H = 1, delta = 1, seed = 123) {
 
 
 
-#' Two-Sample JINI Fiducial Test
+#' Two-Sample Fima Test
 #'
 #' Performs differentially private two-sample proportion comparison.
 #'
@@ -67,11 +67,11 @@ ibf <- function(pi0, eps, n, H = 1, delta = 1, seed = 123) {
 #' @param seed Random seed
 #'
 #' @return Vector of H differences between group distributions
-jini2samples_fiducial_Priv <- function(pi1, pi2, H, eps, n1, n2, seed) {
+fima2samples<- function(pi1, pi2, H, eps, n1, n2, seed) {
   set.seed(seed)
   
-  distri_grp1 <- ibf(pi0 = pi1, H=H, eps = eps/2, n = n1, seed=sample(1:10000,1))
-  distri_grp2 <- ibf(pi0 = pi2, H=H, eps = eps/2, n = n2, seed=sample(10001:20000,1))
+  distri_grp1 <- fima(pi0 = pi1, H=H, eps = eps/2, n = n1, seed=sample(1:10000,1))
+  distri_grp2 <- fima(pi0 = pi2, H=H, eps = eps/2, n = n2, seed=sample(10001:20000,1))
   
   res <- distri_grp1 - distri_grp2
   return(res)
@@ -79,7 +79,7 @@ jini2samples_fiducial_Priv <- function(pi1, pi2, H, eps, n1, n2, seed) {
 
 
 
-#' Compute Power for Two-Sample JINI Test
+#' Compute Power for Two-Sample test with Fima
 #'
 #' Evaluates statistical power across different sample sizes.
 #'
@@ -118,7 +118,7 @@ compute_two_sample_power <- function(theta1, theta2, n_values, eps, B, H) {
       pi1 <- get_pi(theta = theta1, eps = eps/2, n = n)
       pi2 <- get_pi(theta = theta2, eps = eps/2, n = n)
       
-      emp_density_pj <- jini2samples_fiducial_Priv(
+      emp_density_pj <- fima2samples(
         pi1 = pi1, pi2 = pi2, 
         H = H, eps = eps, 
         n1 = n, n2 = n, 
