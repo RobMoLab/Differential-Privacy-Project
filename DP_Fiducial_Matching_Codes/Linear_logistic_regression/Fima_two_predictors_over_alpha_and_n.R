@@ -1,6 +1,7 @@
 # Load necessary package
 library(microbenchmark)
 
+
 # Function Definitions
 inverse_logit <- function(nu) {
   exp(nu) / (1 + exp(nu))
