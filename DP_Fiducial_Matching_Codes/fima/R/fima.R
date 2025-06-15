@@ -1,4 +1,4 @@
-dp_prop <- function(true_prop, eps, n, delta = 1) {
+dp_prop <- function(true_prop, eps = 1, n, delta = 1) {
 
   W <- runif(1, -0.5, 0.5)
   dp_stat <- true_prop + (delta / (eps * n)) * sign(W) * log(1 - 2 * abs(W))
@@ -7,7 +7,7 @@ dp_prop <- function(true_prop, eps, n, delta = 1) {
 
 }
 
-dp_count <- function(count, eps, delta = 1) {
+dp_count <- function(count, eps = 1, delta = 1) {
 
   W <- runif(1, -0.5, 0.5)
   dp_noise <- (delta / eps) * sign(W) * log(1 - 2 * abs(W))
@@ -17,7 +17,7 @@ dp_count <- function(count, eps, delta = 1) {
 
 }
 
-fima_prop <- function(dp_stat, n, eps, delta = 1, H = 10^4, seed = 123) {
+fima_prop <- function(dp_stat, n, eps = 1, delta = 1, H = 10^4, seed = 123) {
 
   set.seed(seed)
 
@@ -46,7 +46,7 @@ fima_prop <- function(dp_stat, n, eps, delta = 1, H = 10^4, seed = 123) {
 
 }
 
-fima_count <- function(dp_stat, n, eps, delta = 1, H = 10^4, terms = 1, seed = 123) {
+fima_count <- function(dp_stat, n, eps = 1, delta = 1, H = 10^4, terms = 1, seed = 123) {
 
   set.seed(seed)
 
@@ -77,7 +77,7 @@ fima_count <- function(dp_stat, n, eps, delta = 1, H = 10^4, terms = 1, seed = 1
 
 }
 
-fima_2prop <- function(dp_pi1, dp_pi2, n1, n2, eps, delta = 1, H = 10^4, seed = 123) {
+fima_2prop <- function(dp_pi1, dp_pi2, n1, n2, eps = 1, delta = 1, H = 10^4, seed = 123) {
 
   # Generate distributions for both groups
   fima_prop1 <- fima_prop(dp_pi = dp_pi1, n = n1, eps = eps/2, delta = delta, H = H, seed = seed + 1)
@@ -101,7 +101,7 @@ chi2 <- function(tab){
 
 }
 
-fima_chi2 <- function(dp_table, n, eps, delta = 2, H = 10^4, seed = 123) {
+fima_chi2 <- function(dp_table, n, eps = 1, delta = 2, H = 10^4, seed = 123) {
 
   # Compute chi-2 statistic on DP table
   dp_table <- pmax(dp_table, 0) + 0.5 # Haldane-Anscombe Correction
@@ -122,7 +122,17 @@ fima_chi2 <- function(dp_table, n, eps, delta = 2, H = 10^4, seed = 123) {
     fima_joint_probs <- outer(fima_marginal_row[h, ], fima_marginal_col[h, ])
     fima_counts[h, , ] <- matrix(rmultinom(n = 1, size = n, prob = fima_joint_probs), nrow(dp_table), ncol(dp_table)) + 0.5 # Haldane-Anscombe Correction
 
+    # or
+    # fima_counts <- n * outer(fima_marginal_row[h, ], fima_marginal_col[h, ]) + 0.5 # Haldane-Anscombe Correction
+
   }
+
+  # or
+  # fima_counts <- simplify2array(
+  #   Map(function(r, c) n * outer(r, c) + 0.5,
+  #       split(fima_marginal_row, row(fima_marginal_row)),
+  #       split(fima_marginal_col, row(fima_marginal_col)))
+  # )
 
   fima_chi2_dist <- apply(fima_counts, 1, chi2)
 
@@ -138,11 +148,17 @@ logit <- function(theta) {
 
 }
 
-fima_logistic <- function(dp_pi, n, eps, delta = 2, H = 10^4, seed = 123) {
+expit <- function(x) {
+
+  return(exp(x) / (1 + exp(x)))
+
+}
+
+fima_logistic <- function(dp_pi, n, eps = 1, delta = 2, H = 10^4, seed = 123) {
 
   # Generate distributions for betas
-  fima_beta0 <- logit(fima_prop(dp_pi = dp_pi[1], n = n, eps = eps / length(dp_pi), delta = delta, H = H, seed = seed + 1))
-  fima_betas <- logit(sapply(dp_pi[-1], fima_prop, n = n, eps = eps / length(dp_pi), delta = delta, H = H, seed = seed + 2)) - fima_beta_0
+  fima_beta0 <- logit(fima_prop(dp_stat = dp_pi[1], n = n, eps = eps / length(dp_pi), delta = delta, H = H, seed = seed + 1))
+  fima_betas <- logit(sapply(dp_pi[-1], fima_prop, n = n, eps = eps / length(dp_pi), delta = delta, H = H, seed = seed + 2)) - fima_beta0
 
   # Compute differences
   fima_beta <- rbind(fima_beta0, fima_betas)
