@@ -161,7 +161,7 @@ fima_logistic <- function(dp_pi, n, eps = 1, delta = 2, H = 10^4, seed = 123) {
   fima_betas <- logit(sapply(dp_pi[-1], fima_prop, n = n, eps = eps / length(dp_pi), delta = delta, H = H, seed = seed + 2)) - fima_beta0
 
   # Compute differences
-  fima_beta <- rbind(fima_beta0, fima_betas)
+  fima_beta <- cbind(fima_beta0, fima_betas)
 
   return(fima_beta)
 

@@ -18,7 +18,7 @@ fima_chi2(priv_tab, n, eps)
 # Logistic
 eps <- 1
 H <- 10^4
-n <- 100
+n <- 1000
 beta0 <- 0.5
 beta1 <- 2
 beta2 <- -2
@@ -52,6 +52,6 @@ n2 <- sum(W2)
 n3 <- sum(W3)
 n4 <- sum(W4)
 
-dp_pi <- dp_prop(c(pi1, pi2, pi3, pi4), eps = eps / 4, n = n)
+dp_pi <- dp_prop(c(pi1, pi2, pi3), eps = eps / 3, n = n)
 
-fima_logistic(dp_pi, n, eps = 1, delta = 2, H = 10^4, seed = 123)
+dist <- fima_logistic(dp_pi, n, eps = 1, delta = 2, H = 10^4, seed = 123)
