@@ -56,7 +56,7 @@ fima_count <- function(dp_stat, n, eps = 1, delta = 1, H = 10^4, terms = 1, seed
   vec_noise <- sapply(split(vec_noise, ceiling(seq_along(vec_noise) / terms)), sum)
 
   # Quantity on which to inverse binomial CDF
-  pi_star <- (dp_stat - vec_noise)/n
+  pi_star <- (dp_stat - vec_noise) / n
 
   # Initialize output vector
   theta <- rep(NA, H)
@@ -77,11 +77,11 @@ fima_count <- function(dp_stat, n, eps = 1, delta = 1, H = 10^4, terms = 1, seed
 
 }
 
-fima_2prop <- function(dp_pi1, dp_pi2, n1, n2, eps = 1, delta = 1, H = 10^4, seed = 123) {
+fima_2prop <- function(dp_stat1, dp_stat2, n1, n2, eps = 1, delta = 1, H = 10^4, seed = 123) {
 
   # Generate distributions for both groups
-  fima_prop1 <- fima_prop(dp_pi = dp_pi1, n = n1, eps = eps/2, delta = delta, H = H, seed = seed + 1)
-  fima_prop2 <- fima_prop(dp_pi = dp_pi2, n = n2, eps = eps/2, delta = delta, H = H, seed = seed + 2)
+  fima_prop1 <- fima_prop(dp_stat = dp_stat1, n = n1, eps = eps, delta = delta, H = H, seed = seed + 1)
+  fima_prop2 <- fima_prop(dp_stat = dp_stat2, n = n2, eps = eps, delta = delta, H = H, seed = seed + 2)
 
   # Compute differences
   res <- fima_prop1 - fima_prop2
@@ -122,17 +122,7 @@ fima_chi2 <- function(dp_table, n, eps = 1, delta = 2, H = 10^4, seed = 123) {
     fima_joint_probs <- outer(fima_marginal_row[h, ], fima_marginal_col[h, ])
     fima_counts[h, , ] <- matrix(rmultinom(n = 1, size = n, prob = fima_joint_probs), nrow(dp_table), ncol(dp_table)) + 0.5 # Haldane-Anscombe Correction
 
-    # or
-    # fima_counts <- n * outer(fima_marginal_row[h, ], fima_marginal_col[h, ]) + 0.5 # Haldane-Anscombe Correction
-
   }
-
-  # or
-  # fima_counts <- simplify2array(
-  #   Map(function(r, c) n * outer(r, c) + 0.5,
-  #       split(fima_marginal_row, row(fima_marginal_row)),
-  #       split(fima_marginal_col, row(fima_marginal_col)))
-  # )
 
   fima_chi2_dist <- apply(fima_counts, 1, chi2)
 
