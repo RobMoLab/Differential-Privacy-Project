@@ -1,6 +1,6 @@
 dp_prop <- function(true_prop, eps = 1, n, delta = 1) {
 
-  W <- runif(1, -0.5, 0.5)
+  W <- runif(length(true_prop), -0.5, 0.5)
   dp_stat <- true_prop + (delta / (eps * n)) * sign(W) * log(1 - 2 * abs(W))
 
   return(dp_stat)
@@ -9,7 +9,7 @@ dp_prop <- function(true_prop, eps = 1, n, delta = 1) {
 
 dp_count <- function(count, eps = 1, delta = 1) {
 
-  W <- runif(1, -0.5, 0.5)
+  W <- runif(length(count), -0.5, 0.5)
   dp_noise <- (delta / eps) * sign(W) * log(1 - 2 * abs(W))
   dp_stat <- count + dp_noise
 
@@ -124,7 +124,7 @@ fima_chi2 <- function(dp_table, n, eps = 1, delta = 2, H = 10^4, seed = 123) {
 
   }
 
-  fima_chi2_dist <- apply(fima_counts, 1, chi2)
+  fima_chi2_dist <- apply(dp_count(fima_counts, eps = eps, delta = delta), 1, chi2)
 
   pval <- (sum(fima_chi2_dist >= chi2_obs) + 1)/(H + 1)
 

@@ -36,7 +36,7 @@ dist <- fima_2prop(pi1, pi2, n1 = n, n2 = n, eps = eps, H = H)
 
 # Chi-squared
 diff <- 0.01
-joint_probs0 <- c(0.25, 0.25, 0.25, 0.25) + diff*c(1,-1,-1,1)
+joint_probs0 <- c(0.25, 0.25, 0.25, 0.25) #+ diff*c(1,-1,-1,1)
 
 n <- 5000
 eps <- 1
