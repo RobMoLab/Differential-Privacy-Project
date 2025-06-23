@@ -42,6 +42,8 @@ fima_prop <- function(dp_stat, n, eps = 1, delta = 1, H = 10^4, seed = 123) {
   theta[pi_star >= 1] <- 1 - .Machine$double.eps  # Clip to just below 1
   theta[pi_star <= 0] <- .Machine$double.eps      # Clip to just above 0
 
+  class(theta) <- "prop"
+
   return(theta)
 
 }
@@ -84,9 +86,11 @@ fima_2prop <- function(dp_stat1, dp_stat2, n1, n2, eps = 1, delta = 1, H = 10^4,
   fima_prop2 <- fima_prop(dp_stat = dp_stat2, n = n2, eps = eps, delta = delta, H = H, seed = seed + 2)
 
   # Compute differences
-  res <- fima_prop1 - fima_prop2
+  theta <- fima_prop1 - fima_prop2
 
-  return(res)
+  class(theta) <- "2prop"
+
+  return(theta)
 
 }
 
@@ -126,9 +130,11 @@ fima_chi2 <- function(dp_table, n, eps = 1, delta = 2, H = 10^4, seed = 123) {
 
   fima_chi2_dist <- apply(dp_count(fima_counts, eps = eps, delta = delta), 1, chi2)
 
-  pval <- (sum(fima_chi2_dist >= chi2_obs) + 1)/(H + 1)
+  out <- list("dist" = fima_chi2_dist, "obs" = chi2_obs)
 
-  return(pval)
+  class(out) <- "chi2"
+
+  return(out)
 
 }
 
@@ -144,6 +150,7 @@ expit <- function(x) {
 
 }
 
+### This is wrong since each proportion has different base sample size n: needs to be fixed
 fima_logistic <- function(dp_pi, n, eps = 1, delta = 2, H = 10^4, seed = 123) {
 
   # Generate distributions for betas
@@ -151,8 +158,61 @@ fima_logistic <- function(dp_pi, n, eps = 1, delta = 2, H = 10^4, seed = 123) {
   fima_betas <- logit(sapply(dp_pi[-1], fima_prop, n = n, eps = eps / length(dp_pi), delta = delta, H = H, seed = seed + 2)) - fima_beta0
 
   # Compute differences
-  fima_beta <- cbind(fima_beta0, fima_betas)
+  beta <- cbind(fima_beta0, fima_betas)
+  colnames(beta) <- c("Beta_0", paste0("Beta_", 1:ncol(fima_betas)))
 
-  return(fima_beta)
+  class(beta) <- "logistic"
+
+  return(beta)
+
+}
+
+fima_infer <- function(obj, theta0 = 0.5, ha = "greater", alpha = 0.05) {
+
+  if(class(obj) == "prop") {
+
+    if(ha == "greater") {
+
+      p_val <- (sum(obj > theta0) + 1)/(length(obj) + 1)
+
+    } else {
+
+      p_val <- (sum(obj < theta0) + 1)/(length(obj) + 1)
+
+    }
+
+    ci <- quantile(obj, probs = c(alpha/2, 1 - alpha/2))
+
+    return(list("null" = theta0, "alternative" = ha, "p-value" = p_val, "conf_int" = ci))
+
+  } else if(class(obj) == "2prop") {
+
+    if(ha == "smaller") {
+
+      p_val <- (sum(obj > theta0) + 1)/(length(obj) + 1)
+
+    } else {
+
+      p_val <- (sum(obj < theta0) + 1)/(length(obj) + 1)
+
+    }
+
+    ci <- quantile(obj, probs = c(alpha/2, 1 - alpha/2))
+
+    return(list("null" = theta0, "alternative" = ha, "p-value" = p_val, "conf_int" = ci))
+
+  } else if (class(obj) == "chi2") {
+
+    p_val <- (sum(obj$dist >= obj$obs) + 1)/(H + 1)
+
+    return(list("p-value" = p_val))
+
+  } else if(class(obj) == "logistic"){
+
+    ci <- apply(obj, 2, quantile, probs = c(alpha/2, 1 - alpha/2))
+
+    return(list("conf_int" = ci))
+
+  }
 
 }
