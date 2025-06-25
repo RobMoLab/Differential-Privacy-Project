@@ -13,7 +13,7 @@ fima_infer(obj, theta0 = 0.5, ha = "greater", alpha = 0.05)
 
 \item{ha}{A \code{character} representing the one-sided alternative for the hypothesis test. The options are \code{"greater"} (i.e. we want to test if the true parameter is greater than \code{theta0}) or \code{"smaller"} (i.e. we want to test if the true parameter is smaller than \code{theta0}).}
 
-\item{alpha}{A \code{double} value representing the significance level for the \code{1 - alpha} confidence intervals on the FIMA distribution (default value is \code{alpha = 0.05}).}
+\item{alpha}{A \code{double} value representing the significance level for the \eqn{1 - \alpha} confidence intervals on the FIMA distribution (default value is \code{alpha = 0.05}).}
 }
 \value{
 A \code{list} containing the following objects:
@@ -25,7 +25,7 @@ A \code{list} containing the following objects:
 }
 }
 \description{
-This function is a wrapper to directly extract p-values (where possible) and confidence intervals (where needed) from the FIMA distributions produced by functions \code{fima_prop}, \code{fima_2prop}, \code{fima_chi2} and \code{fima_logit} (see Romanus et al., 2025).
+A wrapper function to extract p-values (where possible) and confidence intervals (where needed) from the FIMA distributions produced by functions \code{fima_prop}, \code{fima_2prop}, \code{fima_chi2} and \code{fima_logit} (see Romanus et al., 2025).
 }
 \examples{
 \dontrun{
@@ -40,6 +40,9 @@ H <- 10^4 # number of simulations for FIMA distribution
 dist <- fima_prop(pi, eps = eps, n = n, H = H) # produce FIMA distribution
 fima_infer(dist) # obtain inferential quantities
 }
+}
+\references{
+Romanus, O.M., Boulaguiem, Y. & Molinari, R. (2025) "Fiducial Matching: Differentially Private Inference for Categorical Data".
 }
 \author{
 Roberto Molinari and Ogonnaya M. Romanus
