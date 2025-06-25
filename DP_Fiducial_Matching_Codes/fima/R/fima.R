@@ -1,3 +1,33 @@
+#' Produce DP proportion with additive Laplace mechanism
+#' @description This function is a wrapper to directly extract p-values (where possible) and confidence intervals (where needed) from the FIMA distributions produced by functions \code{fima_prop}, \code{fima_2prop}, \code{fima_chi2} and \code{fima_logit} (see Romanus et al., 2025).
+#' @param obj The object output from the functions \code{fima_prop}, \code{fima_2prop}, \code{fima_chi2} and \code{fima_logit} (it consists in a \code{vector} representing the FIMA distribution).
+#' @param theta0 A \code{double} value representing the parameter value to test under the null hypothesis (default value is \code{theta0 = 0.5}). This is used only when \code{obj} comes from \code{fima_prop} or \code{fima_2prop}.
+#' @param ha A \code{character} representing the one-sided alternative for the hypothesis test. The options are \code{"greater"} (i.e. we want to test if the true parameter is greater than \code{theta0}) or \code{"smaller"} (i.e. we want to test if the true parameter is smaller than \code{theta0}).
+#' @param alpha A \code{double} value representing the significance level for the \code{1 - alpha} confidence intervals on the FIMA distribution (default value is \code{alpha = 0.05}).
+#' @return A \code{list} containing the following objects:
+#' \describe{
+#'  \item{null}{The value of the parameter tested under the null hypothesis. This is produced for objects output from \code{fima_prop} and \code{fima_2prop} functions.}
+#'  \item{alternative}{The direction of the hypothesis test under the alternative. This is produced for objects output from \code{fima_prop} and \code{fima_2prop} functions.}
+#'  \item{p_value}{The p-value of the hypothesis test. This is produced for objects output from \code{fima_prop}, \code{fima_2prop} and \code{fima_chi2} functions.}
+#'  \item{conf_int}{A \code{double} vector containing the lower and upper bound of the confidence intervals for the parameter of interest. This is produced for objects output from \code{fima_prop}, \code{fima_2prop} and \code{fima_logit} functions.}
+#' }
+#' @author Roberto Molinari and Ogonnaya M. Romanus
+#' @import stats
+#' @import utils
+#' @export
+#' @examples
+#' \dontrun{
+#' # Inference for one-sample proportion
+#' p <- 0.8 # true proportion
+#' n <- 30 # sample size
+#' set.seed(14) # seed for reproducibility
+#' x <- rbinom(n, 1, prob = p) # simulate data
+#' eps <- 1 # epsilon-DP privacy budget
+#' pi <- dp_prop(mean(x), eps = eps, n = n) # produce DP proportion
+#' H <- 10^4 # number of simulations for FIMA distribution
+#' dist <- fima_prop(pi, eps = eps, n = n, H = H) # produce FIMA distribution
+#' fima_infer(dist) # obtain inferential quantities
+#' }
 dp_prop <- function(true_prop, eps = 1, n, delta = 1) {
 
   W <- runif(length(true_prop), -0.5, 0.5)
@@ -17,9 +47,9 @@ dp_count <- function(count, eps = 1, delta = 1) {
 
 }
 
-fima_prop <- function(dp_stat, n, eps = 1, delta = 1, H = 10^4, seed = 123) {
+fima_prop <- function(dp_stat, n, eps = 1, delta = 1, H = 10^4, seed = NA) {
 
-  set.seed(seed)
+  if(!is.na(seed)) set.seed(seed)
 
   # Seeds for Laplace privacy noise
   W <- runif(H, -0.5, 0.5)
@@ -48,9 +78,9 @@ fima_prop <- function(dp_stat, n, eps = 1, delta = 1, H = 10^4, seed = 123) {
 
 }
 
-fima_count <- function(dp_stat, n, eps = 1, delta = 1, H = 10^4, terms = 1, seed = 123) {
+fima_count <- function(dp_stat, n, eps = 1, delta = 1, H = 10^4, terms = 1, seed = NA) {
 
-  set.seed(seed)
+  if(!is.na(seed)) set.seed(seed)
 
   # Seeds for Laplace privacy noise
   W <- runif(H*terms, -0.5, 0.5)
@@ -79,11 +109,11 @@ fima_count <- function(dp_stat, n, eps = 1, delta = 1, H = 10^4, terms = 1, seed
 
 }
 
-fima_2prop <- function(dp_stat1, dp_stat2, n1, n2, eps = 1, delta = 1, H = 10^4, seed = 123) {
+fima_2prop <- function(dp_stat1, dp_stat2, n1, n2, eps = 1, delta = 1, H = 10^4, seed = NA) {
 
   # Generate distributions for both groups
-  fima_prop1 <- fima_prop(dp_stat = dp_stat1, n = n1, eps = eps, delta = delta, H = H, seed = seed + 1)
-  fima_prop2 <- fima_prop(dp_stat = dp_stat2, n = n2, eps = eps, delta = delta, H = H, seed = seed + 2)
+  fima_prop1 <- fima_prop(dp_stat = dp_stat1, n = n1, eps = eps, delta = delta, H = H, seed = seed)
+  fima_prop2 <- fima_prop(dp_stat = dp_stat2, n = n2, eps = eps, delta = delta, H = H, seed = seed)
 
   # Compute differences
   theta <- fima_prop1 - fima_prop2
@@ -105,7 +135,7 @@ chi2 <- function(tab){
 
 }
 
-fima_chi2 <- function(dp_table, n, eps = 1, delta = 2, H = 10^4, seed = 123) {
+fima_chi2 <- function(dp_table, n, eps = 1, delta = 2, H = 10^4, seed = NA) {
 
   # Compute chi-2 statistic on DP table
   dp_table <- pmax(dp_table, 0) + 0.5 # Haldane-Anscombe Correction
@@ -116,8 +146,8 @@ fima_chi2 <- function(dp_table, n, eps = 1, delta = 2, H = 10^4, seed = 123) {
   chi2_obs <- sum((dp_table - expected)^2 / expected)
 
   # Vectorized FIMA for marginals
-  fima_marginal_row <- sapply(marginal_row, fima_count, n = n, eps = eps, delta = delta, H = H, terms = nrow(dp_table), seed = seed + 1)
-  fima_marginal_col <- sapply(marginal_col, fima_count, n = n, eps = eps, delta = delta, H = H, terms = ncol(dp_table), seed = seed + 2)
+  fima_marginal_row <- sapply(marginal_row, fima_count, n = n, eps = eps, delta = delta, H = H, terms = nrow(dp_table), seed = seed)
+  fima_marginal_col <- sapply(marginal_col, fima_count, n = n, eps = eps, delta = delta, H = H, terms = ncol(dp_table), seed = seed)
 
   # Generate FIMA joint probabilities and counts
   fima_counts <- array(NA, dim = c(H, nrow(dp_table), ncol(dp_table)))
@@ -167,6 +197,37 @@ fima_logistic <- function(dp_pi, n, eps = 1, delta = 2, H = 10^4, seed = 123) {
 
 }
 
+
+#' FIMA Inference
+#' @description This function is a wrapper to directly extract p-values (where possible) and confidence intervals (where needed) from the FIMA distributions produced by functions \code{fima_prop}, \code{fima_2prop}, \code{fima_chi2} and \code{fima_logit} (see Romanus et al., 2025).
+#' @param obj The object output from the functions \code{fima_prop}, \code{fima_2prop}, \code{fima_chi2} and \code{fima_logit} (it consists in a \code{vector} representing the FIMA distribution).
+#' @param theta0 A \code{double} value representing the parameter value to test under the null hypothesis (default value is \code{theta0 = 0.5}). This is used only when \code{obj} comes from \code{fima_prop} or \code{fima_2prop}.
+#' @param ha A \code{character} representing the one-sided alternative for the hypothesis test. The options are \code{"greater"} (i.e. we want to test if the true parameter is greater than \code{theta0}) or \code{"smaller"} (i.e. we want to test if the true parameter is smaller than \code{theta0}).
+#' @param alpha A \code{double} value representing the significance level for the \code{1 - alpha} confidence intervals on the FIMA distribution (default value is \code{alpha = 0.05}).
+#' @return A \code{list} containing the following objects:
+#' \describe{
+#'  \item{null}{The value of the parameter tested under the null hypothesis. This is produced for objects output from \code{fima_prop} and \code{fima_2prop} functions.}
+#'  \item{alternative}{The direction of the hypothesis test under the alternative. This is produced for objects output from \code{fima_prop} and \code{fima_2prop} functions.}
+#'  \item{p_value}{The p-value of the hypothesis test. This is produced for objects output from \code{fima_prop}, \code{fima_2prop} and \code{fima_chi2} functions.}
+#'  \item{conf_int}{A \code{double} vector containing the lower and upper bound of the confidence intervals for the parameter of interest. This is produced for objects output from \code{fima_prop}, \code{fima_2prop} and \code{fima_logit} functions.}
+#' }
+#' @author Roberto Molinari and Ogonnaya M. Romanus
+#' @import stats
+#' @import utils
+#' @export
+#' @examples
+#' \dontrun{
+#' # Inference for one-sample proportion
+#' p <- 0.8 # true proportion
+#' n <- 30 # sample size
+#' set.seed(14) # seed for reproducibility
+#' x <- rbinom(n, 1, prob = p) # simulate data
+#' eps <- 1 # epsilon-DP privacy budget
+#' pi <- dp_prop(mean(x), eps = eps, n = n) # produce DP proportion
+#' H <- 10^4 # number of simulations for FIMA distribution
+#' dist <- fima_prop(pi, eps = eps, n = n, H = H) # produce FIMA distribution
+#' fima_infer(dist) # obtain inferential quantities
+#' }
 fima_infer <- function(obj, theta0 = 0.5, ha = "greater", alpha = 0.05) {
 
   if(class(obj) == "prop") {
@@ -183,7 +244,7 @@ fima_infer <- function(obj, theta0 = 0.5, ha = "greater", alpha = 0.05) {
 
     ci <- quantile(obj, probs = c(alpha/2, 1 - alpha/2))
 
-    return(list("null" = theta0, "alternative" = ha, "p-value" = p_val, "conf_int" = ci))
+    return(list("null" = theta0, "alternative" = ha, "p_value" = p_val, "conf_int" = ci))
 
   } else if(class(obj) == "2prop") {
 
@@ -199,13 +260,13 @@ fima_infer <- function(obj, theta0 = 0.5, ha = "greater", alpha = 0.05) {
 
     ci <- quantile(obj, probs = c(alpha/2, 1 - alpha/2))
 
-    return(list("null" = theta0, "alternative" = ha, "p-value" = p_val, "conf_int" = ci))
+    return(list("null" = theta0, "alternative" = ha, "p_value" = p_val, "conf_int" = ci))
 
   } else if (class(obj) == "chi2") {
 
-    p_val <- (sum(obj$dist >= obj$obs) + 1)/(H + 1)
+    p_val <- (sum(obj$dist >= obj$obs) + 1)/(length(obj$dist) + 1)
 
-    return(list("p-value" = p_val))
+    return(list("p_value" = p_val))
 
   } else if(class(obj) == "logistic"){
 
