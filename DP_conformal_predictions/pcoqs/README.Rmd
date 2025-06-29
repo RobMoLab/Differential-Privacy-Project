@@ -1,0 +1,96 @@
+---
+title: "pcoqs"
+output: github_document
+---
+
+<img src="man/figures/peacocks.png" align="right" height="200" />
+
+**Differentially Private Conformal Prediction**  
+An R package for producing differentially private interval and set-valued predictions for regression and classification.
+
+---
+
+## 🔍 Overview
+
+`pcoqs` provides functionality for conformal prediction enhanced with differential privacy. It supports:
+
+- Regression prediction intervals  
+- Classification prediction sets (multiclass + binary)  
+- Custom nonconformity scores and model/predict wrappers  
+- Gaussian noise injection for private quantile estimation
+
+---
+
+## 🧪 Installation
+
+```r
+# Install from GitHub (requires devtools)
+devtools::install_github("SMAC-Group/pcoqs")
+```
+
+---
+
+## 🚀 Quick Start
+
+### Regression Example
+
+```r
+library(pcoqs)
+
+set.seed(123)
+X <- matrix(rnorm(100 * 3), ncol = 3)
+Y <- X %*% c(1, -2, 1) + rnorm(100)
+
+model <- lm(Y ~ ., data = data.frame(Y, X))
+
+result <- p_coqs(model, X, Y, X, alpha = 0.1, rho = 1.0)
+head(result$output)
+```
+
+### Classification Example
+
+```r
+library(pcoqs)
+library(nnet)
+
+set.seed(456)
+X <- matrix(rnorm(200 * 3), ncol = 3)
+probs <- t(apply(X, 1, function(row) {
+  logits <- c(0, row[1], -row[2])
+  exp_logits <- exp(logits)
+  exp_logits / sum(exp_logits)
+}))
+Y <- apply(probs, 1, function(p) sample(1:3, 1, prob = p))
+
+model <- multinom(as.factor(Y) ~ ., data = data.frame(Y = as.factor(Y), X), trace = FALSE)
+
+result <- p_coqs(
+  model, X, Y, X,
+  alpha = 0.1, rho = 1.0,
+  predict_fun = function(model, X, ...) predict(model, data.frame(X), type = "probs"),
+  score_fun = function(y, probs) sapply(1:length(y), function(i) 1 - probs[i, y[i]]),
+  output_fun = function(probs, q) {
+    data.frame(predicted_set = apply(probs, 1, function(p) paste(which(p >= 1 - q), collapse = ",")))
+  },
+  lower_bound = 0, upper_bound = 1
+)
+head(result$output)
+```
+
+---
+
+## 📘 Documentation
+
+See function documentation using `?p_coqs`, `?priv_quant`, and `?noisy_rc` once installed.
+
+---
+
+## 🛡️ License
+
+MIT © Roberto Molinari
+
+---
+
+## 🦚 Peacocks for Privacy
+
+Because statistical elegance deserves visual elegance.
