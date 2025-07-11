@@ -1,0 +1,176 @@
+\documentclass{standalone}
+\usepackage{pgfplots}
+\usepackage{xcolor}
+\usepgfplotslibrary{statistics, groupplots}
+\pgfplotsset{compat=1.17}
+
+% Auburn colors
+\definecolor{auburnorange}{RGB}{232, 119, 34}
+\definecolor{auburnblue}{RGB}{12, 35, 64}
+\definecolor{lightgray}{gray}{0.9}
+\definecolor{lightbluegray}{RGB}{220,230,240}
+
+\begin{document}
+\begin{tikzpicture}
+
+% Background rectangles (before groupplot so they appear underneath)
+%\fill [lightgray] (0.2,0.1) rectangle (5.3,6.3); % Non-DP group
+%\fill [lightbluegray] (5.6,0.1) rectangle (10.7,6.3); % DP group
+
+\begin{groupplot}[
+  group style={
+    group size=2 by 1,
+    horizontal sep=0.05cm,
+  },
+  height=8cm,
+  width=7cm,
+  boxplot/draw direction=y,
+  boxplot prepared/absolutepos=true,
+  boxplot/patch type=boxplot,
+  xtick={1,2,3},
+  xticklabels={Standard, ExponQ, P-COQS},
+  x tick label style={align=center},
+  tick style={draw=none},
+  enlarge x limits=0.05,
+  boxplot/every box/.style={draw=black, thick, solid},
+  boxplot/every whisker/.style={black},
+  boxplot/every median/.style={black, very thick},
+  every axis plot/.append style={fill opacity=0.9},
+  ymajorgrids,
+  axis x line*=bottom,
+  axis line style={-}, % Remove arrowheads
+]
+
+% --- Non-DP plot ---
+\nextgroupplot[
+  title={\textbf{Non-DP Model}},
+   title style={yshift=-1.5ex},
+  ylabel={Coverage},
+  ymin=0.825,  ymax=1.005,
+  axis y line=left,
+  yticklabel style={anchor=east},
+]
+
+\addplot+[
+    fill=gray,
+    boxplot prepared={
+        lower whisker=0.836,
+        lower quartile=0.888,
+        median=0.900,
+        upper quartile=0.910,
+        upper whisker=0.948
+    },
+] coordinates {};
+
+\addplot+[
+    fill=auburnorange,
+    boxplot prepared={
+        lower whisker=0.904,
+        lower quartile=0.936,
+        median=0.948,
+        upper quartile=0.962,
+        upper whisker=1.000
+    },
+] coordinates {};
+
+\addplot+[
+    fill=auburnblue!70,
+    boxplot prepared={
+        lower whisker=0.8320,
+        lower quartile=0.8920,
+        median=0.9040,
+        upper quartile=0.9100,
+        upper whisker=0.9440
+    },
+] coordinates {};
+
+
+% Horizontal dashed target line
+\addplot [red, dashed, thick, domain=0.5:3.5] {0.9};
+
+% Mean dots (non-DP)
+\addplot[
+    only marks,
+    mark=*,
+    mark size=2.5pt,
+    red
+] coordinates {
+    (1, 0.899)
+    (2, 0.950)
+    (3, 0.9017)
+};
+
+
+% --- DP plot ---
+\nextgroupplot[
+  title={\textbf{DP Model}},
+  title style={yshift=-1.5ex},
+  ymin=0.825,  ymax=1.005,
+%  axis y line=right,
+%  yticklabels={},
+%  ytick style={draw=none},  
+%  ylabel={},
+%  axis y line style={draw=none}, % <-- this hides the axis line
+axis y line=right,
+axis x line*=bottom,
+x axis line style={draw=black},
+y axis line style={draw=none},
+yticklabel style={color=white},
+ytick style={draw=none},
+ymajorgrids=true,
+]
+
+\addplot+[
+    fill=gray,
+    boxplot prepared={
+        lower whisker=0.8360,
+        lower quartile=0.8880,
+        median=0.8990,
+        upper quartile=0.9100,
+        upper whisker=0.9440
+    },
+] coordinates {};
+
+\addplot+[
+draw=black, solid, 
+    fill=auburnorange,
+    boxplot prepared={
+        lower whisker=0.8900,
+        lower quartile=0.9360,
+        median=0.9460,
+        upper quartile=0.9560,
+        upper whisker=1.000
+    },
+] coordinates {};
+
+\addplot+[
+draw=black, solid, 
+    fill=auburnblue!70,
+    boxplot prepared={
+        lower whisker=0.8460,
+        lower quartile=0.8840,
+        median=0.8940,
+        upper quartile=0.9260,
+        upper whisker=0.9440
+    },
+] coordinates {};
+
+% Horizontal dashed target line
+\addplot [red, dashed, thick, domain=0.5:3.5] {0.9};
+
+% Mean dots (DP)
+\addplot[
+    only marks,
+    mark=*,
+    mark size=2.5pt,
+    red
+] coordinates {
+    (1, 0.8999)
+    (2, 0.9463)
+    (3, 0.9031)
+};
+
+\end{groupplot}
+
+\end{tikzpicture}
+\end{document}

@@ -1,0 +1,169 @@
+\documentclass{standalone}
+\usepackage{pgfplots}
+\usepackage{xcolor}
+\usepgfplotslibrary{groupplots}
+\pgfplotsset{compat=1.17}
+
+% Auburn colors
+\definecolor{auburnorange}{RGB}{232, 119, 34}
+\definecolor{auburnblue}{RGB}{12, 35, 64}
+
+\begin{document}
+\begin{tikzpicture}
+\begin{groupplot}[
+  group style={
+    group size=2 by 1,
+    horizontal sep=0.5cm
+  },
+  ybar,
+  bar width=10pt,
+  enlarge x limits=0.2,
+  ymin=0, ymax=0.8,
+ xtick={1,4,7},
+ xticklabels={1,2,3},
+  x tick label style={align=center},
+  tick style={draw=none},
+  ymajorgrids=true,
+  axis x line*=bottom,
+  axis line style={-},
+  width=8cm,
+  height=8cm,
+]
+
+% --- First subplot (left) ---
+\nextgroupplot[
+  ylabel={Proportion of Sets},
+  title={\textbf{Non-DP Model}},
+  title style={yshift=-1.5ex},
+  axis y line=left,
+  yticklabel style={anchor=east},
+  legend style={
+    at={(1.1,-0.15)},
+    anchor=north,
+    legend columns=3,
+    /tikz/every even column/.append style={column sep=2em},
+    draw=none
+  },
+]
+
+% Group centers: 1 (Normal), 3 (Viral), 5 (Bacterial)
+% Bar offsets: -0.2 (Standard), 0 (ExponQ), +0.2 (P-COQS)
+
+\addplot+[
+    draw=black,
+    fill=gray,
+] coordinates {
+    (0.8, 0.4680)
+    (3.8, 0.5320)
+    (6.8, 0.002000)
+};
+
+\addplot+[
+    draw=black,
+    fill=auburnorange,
+] coordinates {
+    (1.0, 0.2680)
+    (4.0, 0.7140)
+    (7.0, 0.01600)
+};
+
+\addplot+[
+    draw=black,
+    fill=auburnblue!70,
+] coordinates {
+    (1.2, 0.4600)
+    (4.2, 0.5380)
+    (7.2, 0.002000)
+};
+
+% Mean red points with 2×SD
+\addplot+[
+    color=red,
+    only marks,
+    mark=*,
+    mark size=2.5pt,
+    error bars/.cd,
+    y dir=both,
+    y explicit,
+] coordinates {
+    (0.1, 0.4695) +- (0, 0.0578)
+    (1.0, 0.2468) +- (0, 0.1913)
+    (1.9, 0.4625) +- (0, 0.0627)
+
+    (3.1, 0.5292) +- (0, 0.0577)
+    (4.0, 0.7165) +- (0, 0.1475)
+    (4.9, 0.5362) +- (0, 0.0625)
+
+    (6.1, 0.001346) +- (0, 0.0027)
+    (7.0, 0.03669) +- (0, 0.035)
+    (7.9, 0.001252) +- (0, 0.0026)
+};
+
+\legend{Standard, ExponQ, P-COQS}
+
+% --- Second subplot (right) ---
+\nextgroupplot[
+  title={\textbf{DP Model}},
+  title style={yshift=-1.5ex},
+  ylabel={},
+axis y line=left,
+x axis line style={draw=black},
+y axis line style={draw=none},
+  yticklabels=\empty,
+  ytick style={draw=none},
+  x axis line style={draw=black},
+  ymajorgrids=true,
+]
+
+\addplot+[
+    draw=black,
+    fill=gray,
+] coordinates {
+    (0.8, 0.2680)
+    (3.8, 0.5620)
+    (6.8, 0.1690)
+};
+
+\addplot+[
+    draw=black,
+    fill=auburnorange,
+] coordinates {
+    (1.0, 0.1280)
+    (4.0, 0.5020)
+    (7.0, 0.3680)
+};
+
+\addplot+[
+    draw=black,
+    fill=auburnblue!70,
+] coordinates {
+    (1.2, 0.2790)
+    (4.2, 0.5540)
+    (7.2, 0.1620)
+};
+
+\addplot+[
+    color=red,
+    only marks,
+    mark=*,
+    mark size=2.5pt,
+    error bars/.cd,
+    y dir=both,
+    y explicit,
+] coordinates {
+    (0.1, 0.2698) +- (0, 0.0522)
+    (1.0, 0.1246) +- (0, 0.0737)
+    (1.9, 0.2619) +- (0, 0.0903)
+
+    (3.1, 0.5611) +- (0, 0.0362)
+    (4.0, 0.4854) +- (0, 0.1241)
+    (4.9, 0.5536) +- (0, 0.0359)
+
+    (6.1, 0.1691) +- (0, 0.0442)
+    (7.0, 0.3901) +- (0, 0.1883)
+    (7.9, 0.1846) +- (0, 0.0937)
+};
+
+\end{groupplot}
+\end{tikzpicture}
+\end{document}
