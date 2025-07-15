@@ -1,0 +1,36 @@
+FIMA: Inference on Categorical Data with Differential Privacy
+================
+
+<!-- README.md for GitHub -->
+
+# fima <img src="https://img.shields.io/badge/R-FIMA-blue.svg" align="right" height="40"/>
+
+fima (Fiducial Matching) is an R package that implements a new approach
+for *differentially private inference for categorical data* based on the
+method introduced in the paper:
+
+> Romanus, O. M., Boulaguiem, Y. and Molinari, R. (2025). *Fiducial
+> Matching: Differentially Private Inference for Categorical Data*.
+> Working paper.
+
+## 🔧 Installation
+
+You can install the development version of `fima` from GitHub:
+
+``` r
+# install.packages("devtools")
+devtools::install_github("SMAC-Group/fima")
+```
+
+## 📚 References
+
+If you use this package, please cite:
+
+    @article{FIMA2024,
+      title = {Fiducial Matching: Differentially Private Inference for Categorical Data},
+      author = {Romanus, O. M., Boulaguiem, Y. and Molinari, R.},
+      year = {2025},
+      note = {Working paper}
+    }
+
+------------------------------------------------------------------------
